@@ -12,7 +12,7 @@
 struct METAR {
   char name[NAME_SZ+1];
   int vis; // statute miles, fractional rounded down to 0
-  int ceiling; // miles
+  int ceiling; // feet
 };
 
 enum Category {INVALID, LIFR, IFR, MVFR, VFR, NUM_CATEGORIES};
