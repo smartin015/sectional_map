@@ -1,0 +1,52 @@
+	Weather stations						
+	ID	Location	County	State	Frequency	Phone	Type
+1	KSUA	Stuart - Witham Field	Martin	FL	134.475	(772) 692-7399	AWOS III
+2	KF45	North Palm Beach	Palm Beach	FL	119.975	(561) 630-6932	AWOS III
+3	KPBI	Palm Beach International	Palm Beach	FL	ATIS - 123.75	(561) 683-2548	ASOS
+4	KBCT	Boca Raton	Palm Beach	FL	121.125	(561) 391-2696	AWOS III
+5	KLNA	Palm Beach County	Palm Beach	FL	119.925	(561) 964-0308	AWOS IIIP/T
+6	K2IS	Clewiston - Airglades	Hendry	FL	124.174	(863) 983-7020	AWOS IIIP/T
+7	KIMM	Immokalee	Collier	FL	118.525	(239) 657-2038	AWOS III
+8	KRSW	Ft. Myers - Southwest Florida	Lee	FL	ATIS - 124.65	(239) 561-0966	ASOS
+9	KFMY	Ft. Myers - Page	Lee	FL	ATIS - 123.725	(239) 936-2318	ASOS
+10	KPGD	Punta Gorda	Charlotte	FL	135.675	(941) 639-0076	ASOS
+11	KVNC	Venice	Sarasota	FL	119.275	(941) 486-2718	AWOS III
+12	KSRQ	Sarasota - Bradenton	Manatee	FL	124.375	(941) 355-8482	ASOS
+13	KSPG	St. Petersburg - Albert Whitted	Pinellas	FL	118.875	(727) 821-4334	ASOS
+14	KPIE	St. Petersburg - Clearwater	Pinellas	FL	ATIS - 134.5	(727) 531-3456	ASOS
+15	KCLW	Clearwater	Pinellas	FL	119.225	(727) 449-2184	AWOS IIIP
+16	KTPA	Tampa International	Hillsborough	FL	ATIS - 126.45	(813) 873-7228	ASOS
+17	KTPF	Tampa - Peter O. Knight	Hillsborough	FL	118.925	(813) 251-6824	AWOS III
+18	KVDF	Tampa Executive	Hillsborough	FL	121.125	(813) 630-0924	AWOS III
+19	KPCM	Plant City	Hillsborough	FL	120.025	(813) 764-8259	AWOS III
+20	KZPH	Zephyrhills	Pasco	FL	118.975	(813) 780-0031	AWOS IIIP/T
+21	KLAL	Lakeland - Linder	Polk	FL	118.025	(863) 834-2030	AWOS IIIP/T
+22	KBOW	Bartow Executive	Polk	FL	123.775	(863) 533-9004	AWOS III
+23	KGIF	Winter Haven	Polk	FL	133.675	(863) 956-2097	ASOS
+24	KX07	Lake Wales	Polk	FL	124.225	(863) 678-1334	AWOS III
+25	KAVO	Avon Park Executive	Highlands	FL	118.725	(863) 453-4223	AWOS III
+26	KSEF	Sebring	Highlands	FL	119.475	(863) 655-6424	AWOS III
+27	KOBE	Okeechobee	Okeechobee	FL	118.675	(863) 467-1148	AWOS III
+28	KVRB	Vero Beach	Indian River	FL	ATIS - 120.575	(772) 978-9535	ASOS
+29	KMLB	Melbourne	Brevard	FL	ATIS - 132.55	(321) 951-7575	ASOS
+30	KCOI	Merritt Island	Brevard	FL	119.025	(321) 986-8864	AWOS III
+31	KTIX	Titusville - Space Coast Regional	Brevard	FL	120.625	(321) 567-6090	AWOS IIIP/T
+32	KX21	Titusville - Arthur Dunn	Brevard	FL	119.725	(321) 385-0383	AWOS III
+33	KEVB	New Smyrna Beach	Volusia	FL	124.625	(386) 409-4705	AWOS III
+34	KDAB	Daytona Beach	Volusia	FL	ATIS - 132.875	(386) 257-6444	ASOS
+35	KOMN	Ormond Beach	Volusia	FL	118.475	(386) 615-7084	AWOS III
+36	KFIN	Palm Coast - Flagler Executive	Flagler	FL	128.325	(386) 437-7334	AWOS III
+37	KDED	Deland - Sidney H. Taylor	Volusia	FL	119.575	(386) 740-5811	AWOS III
+38	KSFB	Orlando - Sanford	Seminole	FL	ATIS - 125.975	(407) 321-9384	ASOS
+39	KORL	Orlando Executive	Orange	FL	ATIS - 127.25	(407) 658-6753	ASOS
+40	KMCO	Orlando International	Orange	FL	ATIS - 121.25	(407) 855-5235	ASOS
+41	KISM	Kissimmee Gateway	Osceola	FL	128.775	(407) 847-0533	AWOS IIIP/T
+42	KLEE	Leesburg	Lake	FL	ATIS - 134.325	(352) 787-1565	ASOS
+43	KBKV	Brooksville - Tampa Bay	Hernando	FL	134.725	(352) 799-5881	ASOS
+44	KINF	Inverness	Citrus	FL	119.975	(352) 560-6012	AWOS III
+45	KCGC	Crystal River - Captain Tom Davis	Citrus	FL	118.325	(352) 563-6600	AWOS III
+46	KOCF	Ocala - Jim Taylor	Marion	FL	128.125	(352) 237-8525	AWOS IIIP/T
+47	KX60	Williston	Levy	FL	118.425	(352) 528-9949	AWOS IIIT
+48	KGNV	Gainesville	Alachua	FL	ATIS - 127.15	(352) 335-8672	ASOS
+49	K42J	Keystone Heights	Clay	FL	124.275	(352) 473-8273	AWOS III
+50	K28J	Palatka - Lt. Kay Larkin	Putnam	FL	119.925	(386) 312-2212	AWOS III
