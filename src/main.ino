@@ -5,11 +5,6 @@
 #include <ESP8266HTTPClient.h>
 #include "metar.h"
 
-#define POLL_PD 10000
-#define LED_PIN D1
-#define NUMPIXELS 16
-Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRBW + NEO_KHZ800);
-
 struct LocationConfig {
   const char* name;
   int idx;
@@ -69,6 +64,13 @@ const LocationConfig LOCATIONS[] = {
   {"K28J", 49}
 };
 
+
+#define POLL_PD 10000
+#define LED_PIN D1
+#define NUMPIXELS NUM_LOC
+Adafruit_NeoPixel pixels(NUMPIXELS, LED_PIN, NEO_GRBW + NEO_KHZ800);
+
+
 int    HTTP_PORT   = 80;
 String HTTP_METHOD = "GET"; // or "POST"
 char   HOST_NAME[] = "example.phpoc.com"; // hostname of web server:
@@ -83,7 +85,7 @@ void setup() {
   Serial.begin(115200);
   pixels.begin();
   for (int i = 0; i < NUM_LOC; i++) {
-    pixels.setPixelColor(i, pixels.Color(10, 10, 10));
+    pixels.setPixelColor(i, pixels.Color(1, 0, 0, 0));
   }
   pixels.show();
 
@@ -96,26 +98,29 @@ void setup() {
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
-
-  loc_csv = LOCATIONS[0].name;
-
-  for (int i = 1; i < NUM_LOC; i++) {
-    loc_csv += ",";
-    loc_csv += LOCATIONS[i].name;
-  }
-  Serial.println(loc_csv);
-
 }
 
 METAR results[NUM_LOC];
-int get_metars() {
+
+void write_loc_csv(int idx, int count) {
+  loc_csv = LOCATIONS[idx++].name;
+  for (; idx < NUM_LOC; idx++) {
+    loc_csv += ",";
+    loc_csv += LOCATIONS[idx].name;
+  }
+}
+
+#define BUFSZ 8600 
+char buf[BUFSZ];
+int get_metars(int start_idx, int count) {
   int num_extracted = 0;
   if(WiFi.status() != WL_CONNECTED){
     Serial.println("Not connected; skipping fetch");
     return num_extracted;
   }
-
-  for (int i = 0; i < NUM_LOC; i++) {
+  
+  // Reset values to ensure no previous records
+  for (int i = start_idx; i < count; i++) {
     results[i].name[0] = '\0';
     results[i].vis = 0;
     results[i].ceiling = 0;
@@ -123,18 +128,29 @@ int get_metars() {
 
   WiFiClientSecure client;
   client.setInsecure(); // Allow insecure HTTPS fetches with no verification
+
   HTTPClient http;
+  write_loc_csv(start_idx, count);
   String addr = "https://www.aviationweather.gov/metar/data?ids="+loc_csv+"&format=raw&hours=0&taf=off&layout=off&date=0";
   Serial.print("Connecting to ");
   Serial.println(addr);
   http.begin(client, addr);
   int rc = http.GET();
   if (rc == HTTP_CODE_OK) {
-    String payload = http.getString();
-    num_extracted = extract_metar(payload.c_str(), payload.length(), results, NUM_LOC);
-    Serial.print("Extracted ");
-    Serial.print(num_extracted);
-    Serial.println(" locations");
+    size_t len = http.getString().length();
+    if (len > BUFSZ) {
+      Serial.print("ERROR ERROR ERROR: Buffer length exceeded - size of response is ");
+      Serial.println(len);
+    } else {
+      Serial.print("Received ");
+      Serial.print(len);
+      Serial.println(" bytes; extracting...");
+      strncpy(buf, http.getString().c_str(), len);
+      num_extracted = extract_metar(buf, len, &(results[start_idx]), count);
+      Serial.print("Extracted ");
+      Serial.print(num_extracted);
+      Serial.println(" locations");
+    }
   } else {
     Serial.print("Error code: ");
     Serial.println(rc);
@@ -144,38 +160,72 @@ int get_metars() {
   return num_extracted;
 }
 
+void printMETAR(const METAR& m) {
+  Serial.print(m.name);
+  Serial.print("\tvis: ");
+  Serial.print(m.vis);
+  Serial.print("sm\tceil: ");
+  Serial.print(m.ceiling);
+  Serial.print("ft\tpixel_idx: ");
+  Serial.print(get_location(m.name));
+  Serial.print("\tcategory: ");
+  Serial.println(category_str(metar_category(m)));
+}
+
+int get_location(const char* name) {
+  // Yes, this is inefficient. But NUM_LOC is small, so whatever
+  for (int i = 0; i < NUM_LOC; i++) {
+    if (strcmp(LOCATIONS[i].name, name) == 0) {
+      return LOCATIONS[i].idx;
+    }
+  }
+  return -1;
+}
+
 void render() {
   for (int i = 0; i < NUM_LOC; i++) {
-    uint32_t c = pixels.Color(255, 0, 0);
+    uint32_t c = pixels.Color(1, 0, 0, 0);
     switch (metar_category(results[i])) {
       case VFR:
-        c = pixels.Color(0, 255, 255);
+        c = pixels.Color(0, 64, 128, 0);
         break;
       case MVFR:
-        c = pixels.Color(0, 76, 153);
+        c = pixels.Color(60, 0, 100, 0);
         break;
       case IFR:
-        c = pixels.Color(76, 0, 153);
+        c = pixels.Color(100, 0, 60, 0);
         break;
       case LIFR:
-        c = pixels.Color(204, 0, 204);
+        c = pixels.Color(128, 0, 20, 0);
         break;
       default:
         break;
     }
-    pixels.setPixelColor(LOCATIONS[i].idx, c);
+    int loc = get_location(results[i].name);
+    if (loc >= 0) {
+      pixels.setPixelColor(loc, c);
+    }
   }
   pixels.show();
 }
 
 uint64_t next = 0;
 
+#define BATCH_SZ 20
 void loop() {
   uint64_t now = millis();
   if (now > next || (next > 1000000 && now < 10000)) {
-    get_metars();
+    Serial.println("Updating...");
+    for (int i = 0; i < NUM_LOC; i += BATCH_SZ) {
+      int count = min(BATCH_SZ, NUM_LOC-i);
+      get_metars(i, count);
+      for (int j = i; j < i+count; j++) {
+        printMETAR(results[j]);
+      }
+    }
     render();
     next = now + POLL_PD;
     Serial.println("Updated");
   }
+  delay(100);
 }

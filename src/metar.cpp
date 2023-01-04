@@ -3,6 +3,22 @@
 #include <string.h>
 #include <stdio.h>
 
+const char* CATEGORY_STR[] = {
+  "INVALID",
+  "LIFR",
+  "IFR",
+  "MVFR",
+  "VFR",
+  "NUM_CATEGORIES"
+};
+
+const char* category_str(Category c) {
+  if (c > NUM_CATEGORIES || c < 0) {
+    c = INVALID;
+  }
+  return CATEGORY_STR[c];
+}
+
 void parse_metar(const char* metar, uint16_t len, METAR &result) {
   char m[len];
   strncpy(m, metar, len);
@@ -43,6 +59,10 @@ void parse_metar(const char* metar, uint16_t len, METAR &result) {
 Category metar_category(const METAR &m) {
   Category c, v;
 
+  if (m.name[0] == 0) {
+    return INVALID;
+  }
+
   if (m.ceiling < 500) {
     c = LIFR;
   } else if (m.ceiling < 1000) {
@@ -66,13 +86,9 @@ Category metar_category(const METAR &m) {
   return (c < v) ? c : v;
 }
 
-uint16_t extract_metar(const char* html, uint16_t len, METAR* result, uint16_t rlen) {
-  char m[len+1];
-  strncpy(m, html, len);
-  m[len] = 0;
+uint16_t extract_metar(char* html, uint16_t len, METAR* result, uint16_t rlen) {
   METAR* mptr = result;
-
-  char* ptr = strstr(m, METAR_BEGIN);
+  char* ptr = strstr(html, METAR_BEGIN);
   while (ptr != NULL) {
     // printf("ptr = %s\n", ptr);
     char *start = ptr + strlen(METAR_BEGIN); 
