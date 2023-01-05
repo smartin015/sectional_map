@@ -10,7 +10,7 @@ struct LocationConfig {
   int idx;
 };
 
-#define NUM_LOC 50
+#define NUM_LOC 47
 const LocationConfig LOCATIONS[] = {
   {"KSUA", 0},
   {"KF45", 1},
@@ -36,14 +36,11 @@ const LocationConfig LOCATIONS[] = {
   {"KBOW", 21},
   {"KGIF", 22},
   {"KX07", 23},
-  {"KAVO", 24},
   {"KSEF", 25},
   {"KOBE", 26},
   {"KVRB", 27},
   {"KMLB", 28},
-  {"KCOI", 29},
   {"KTIX", 30},
-  {"KX21", 31},
   {"KEVB", 32},
   {"KDAB", 33},
   {"KOMN", 34},
@@ -102,11 +99,11 @@ void setup() {
 
 METAR results[NUM_LOC];
 
-void write_loc_csv(int idx, int count) {
-  loc_csv = LOCATIONS[idx++].name;
-  for (; idx < NUM_LOC; idx++) {
+void write_loc_csv(int start_idx, int count) {
+  loc_csv = LOCATIONS[start_idx].name;
+  for (int i = 1; i < count; i++) {
     loc_csv += ",";
-    loc_csv += LOCATIONS[idx].name;
+    loc_csv += LOCATIONS[start_idx + i].name;
   }
 }
 
