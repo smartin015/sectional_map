@@ -30,6 +30,7 @@ void setup() {
   Serial.print(cfg.ssid);
   Serial.print(", password: ");
   Serial.println(cfg.pass);
+
   WiFi.begin(cfg.ssid, cfg.pass);
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);

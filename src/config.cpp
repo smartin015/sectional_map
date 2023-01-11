@@ -67,9 +67,11 @@ void read_config_line(Config& cfg, const char* line) {
     }
     if (strlen(p1) > LOCNAME_SZ) {
       printf("ERROR: Skipping location %s; location name too long\n", p1);
-    } else if (strspn(p2, "0123456789") != strlen(p2)) {
+    } 
+    /*else if (strspn(p2, "0123456789") != strlen(p2)) {
       printf("ERROR: Skipping location %s; LED index is not digit\n", p1);
-    } else {
+    }*/ 
+    else {
       strncpy(cfg.locations[cfg.num].name, p1, LOCNAME_SZ);
       cfg.locations[cfg.num].idx = atoi(p2);
       cfg.num++;
