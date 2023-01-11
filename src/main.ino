@@ -50,8 +50,14 @@ void setup() {
 void write_loc_csv(int start_idx, int count) {
   loc_csv = cfg.locations[start_idx].name;
   for (int i = 1; i < count; i++) {
+    auto& loc = cfg.locations[start_idx+i];
+    if (loc.ovr != 0) {
+      // Override color setting
+      pixels->setPixelColor(loc.idx, loc.ovr);
+      continue;
+    }
     loc_csv += ",";
-    loc_csv += cfg.locations[start_idx + i].name;
+    loc_csv += loc.name;
   }
 }
 

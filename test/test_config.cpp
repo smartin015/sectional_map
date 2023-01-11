@@ -37,7 +37,27 @@ void test_cfg_empty() {
   TEST_ASSERT_EQUAL_STRING("", c.pass);
 }
 
+void test_cfg_override_color() {
+  char path[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(path);
+  FILE* fp = fdopen(fd, "w");
+  fputs("ABCD=0!FF8800\nDEFG=100!FFAAAA",fp);
+  fclose(fp);
+
+  Config c;
+  read_config(c, path);
+  TEST_ASSERT_EQUAL(2, c.num);
+  TEST_ASSERT_EQUAL_STRING("ABCD", c.locations[0].name);
+  TEST_ASSERT_EQUAL(0, c.locations[0].idx);
+  TEST_ASSERT_EQUAL(0xff8800, c.locations[0].ovr);
+  TEST_ASSERT_EQUAL_STRING("DEFG", c.locations[1].name);
+  TEST_ASSERT_EQUAL(100, c.locations[1].idx);
+  TEST_ASSERT_EQUAL(0xffaaaa, c.locations[1].ovr);
+}
+
 void run_config_tests() {
   RUN_TEST(test_basic_cfg);
   RUN_TEST(test_cfg_empty);
+  RUN_TEST(test_cfg_override_color);
 }
+
