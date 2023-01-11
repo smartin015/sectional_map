@@ -8,6 +8,7 @@ Config::Config() {
   for (int i = 0; i < MAX_LOCATIONS; i++) {
     memset(this->locations[i].name, 0, LOCNAME_SZ+1);
     this->locations[i].idx = 0;
+    this->locations[i].ovr = 0;
   }
   this->num = 0;
 }
@@ -38,6 +39,15 @@ void read_config_line(Config& cfg, const char* line) {
   } else if (strcmp(p1, "PASS") == 0) {
     strncpy(cfg.pass, p2, MAX_WIFI_FIELD_SZ);
   } else {
+    //printf("p2: %s\n", p2);
+    if (strstr(p2, "!")) {
+      char* p3 = strtok(p2, "!");  
+      p3 = strtok(0, "!");
+      //printf("Found ovr: %s\n", p3);
+      if (p3 != NULL) {
+        cfg.locations[cfg.num].ovr = strtol(p3, NULL, 16);
+      }
+    }
     strncpy(cfg.locations[cfg.num].name, p1, LOCNAME_SZ);
     cfg.locations[cfg.num].idx = atoi(p2);
     cfg.num++;
@@ -125,10 +135,10 @@ time_t get_time() {
 }
 
 int get_hour(time_t t) {
-  return hour(t);
+  return 0; // TODO
 }
 int get_minute(time_t t) {
-  return minute(t);
+  return 0; // TODO
 }
 
 #endif // ARDUINO
