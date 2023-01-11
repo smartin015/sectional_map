@@ -20,7 +20,7 @@ void setup() {
   Serial.println(cfg.num);
 
   Serial.println("Setting up LEDs\n");
-  pixels = new Adafruit_NeoPixel(cfg.num, LED_PIN, NEO_RGB + NEO_KHZ800);
+  pixels = new Adafruit_NeoPixel(cfg.num+1, LED_PIN, NEO_RGB + NEO_KHZ800);
   pixels->begin();
   for (int i = 0; i < cfg.num; i++) {
     pixels->setPixelColor(i, pixels->Color(1, 0, 0));
