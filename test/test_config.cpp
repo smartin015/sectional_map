@@ -37,6 +37,53 @@ void test_cfg_empty() {
   TEST_ASSERT_EQUAL_STRING("", c.pass);
 }
 
+void test_cfg_newlines() {
+  char path[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(path);
+  FILE* fp = fdopen(fd, "w");
+  fputs("\n\n\n",fp);
+  fclose(fp);
+
+  Config c;
+  read_config(c, path);
+  TEST_ASSERT_EQUAL(0, c.num);
+}
+
+void test_cfg_garbage() {
+  char path[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(path);
+  FILE* fp = fdopen(fd, "w");
+  fputs("ASDFJSDFKJ=FJKDFJKDFJKD",fp);
+  fclose(fp);
+  Config c;
+  read_config(c, path);
+  TEST_ASSERT_EQUAL(0, c.num);
+}
+  
+void test_cfg_longwifi() {
+  char path[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(path);
+  FILE* fp = fdopen(fd, "w");
+  fputs("SSID=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "\nPASS=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",fp);
+  fclose(fp);
+  Config c;
+  read_config(c, path);
+  TEST_ASSERT_EQUAL_STRING("", c.ssid);
+  TEST_ASSERT_EQUAL_STRING("", c.pass);
+}
+
+void test_cfg_nonnumeric() {
+  char path[] = "/tmp/fileXXXXXX";
+  int fd = mkstemp(path);
+  FILE* fp = fdopen(fd, "w");
+  fputs("ASDF=banana",fp);
+  fclose(fp);
+  Config c;
+  read_config(c, path);
+  TEST_ASSERT_EQUAL(0, c.num);
+}
+
 void test_cfg_override_color() {
   char path[] = "/tmp/fileXXXXXX";
   int fd = mkstemp(path);
@@ -59,5 +106,9 @@ void run_config_tests() {
   RUN_TEST(test_basic_cfg);
   RUN_TEST(test_cfg_empty);
   RUN_TEST(test_cfg_override_color);
+  RUN_TEST(test_cfg_newlines);
+  RUN_TEST(test_cfg_garbage);
+  RUN_TEST(test_cfg_nonnumeric);
+  RUN_TEST(test_cfg_longwifi);
 }
 
