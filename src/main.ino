@@ -20,9 +20,14 @@ void setup() {
   Serial.println(cfg.num);
 
   Serial.println("Setting up LEDs\n");
-  pixels = new Adafruit_NeoPixel(cfg.num+1, LED_PIN, NEO_RGB + NEO_KHZ800);
-  pixels->begin();
+  int nled = 0;
   for (int i = 0; i < cfg.num; i++) {
+    nled = max(nled, cfg.locations[i].idx+1);
+  }
+
+  pixels = new Adafruit_NeoPixel(nled, LED_PIN, NEO_RGB + NEO_KHZ800);
+  pixels->begin();
+  for (int i = 0; i < nled; i++) {
     pixels->setPixelColor(i, pixels->Color(1, 0, 0));
   }
   pixels->show();
@@ -74,7 +79,7 @@ int get_metars(int start_idx, int count) {
   }
   
   // Reset values to ensure no previous records
-  for (int i = start_idx; i < count; i++) {
+  for (int i = 0; i < BATCH_SZ; i++) {
     results[i].name[0] = '\0';
     results[i].vis = 0;
     results[i].ceiling = 0;
@@ -100,7 +105,7 @@ int get_metars(int start_idx, int count) {
       Serial.print(len);
       Serial.println(" bytes; extracting...");
       strncpy(buf, http.getString().c_str(), len);
-      num_extracted = extract_metar(buf, len, &(results[start_idx]), count);
+      num_extracted = extract_metar(buf, len, results, count);
       Serial.print("Extracted ");
       Serial.print(num_extracted);
       Serial.println(" locations");
@@ -136,8 +141,8 @@ int get_location(const char* name) {
   return -1;
 }
 
-void render() {
-  for (int i = 0; i < cfg.num; i++) {
+void render(int extracted) {
+  for (int i = 0; i < extracted; i++) {
     uint32_t c = pixels->Color(1, 0, 0);
     switch (metar_category(results[i])) {
       case VFR:
@@ -160,7 +165,6 @@ void render() {
       pixels->setPixelColor(loc, c);
     }
   }
-  pixels->show();
 }
 
 uint8_t next_hr = -1;
@@ -171,13 +175,12 @@ void do_update(int now_hr) {
     for (int i = 0; i < cfg.num; i += BATCH_SZ) {
       int count = min(BATCH_SZ, cfg.num-i);
       extracted = get_metars(i, count);
-      for (int j = i; j < i+count; j++) {
+      for (int j = 0; j < extracted; j++) {
         printMETAR(results[j]);
       }
+      render(extracted);
     }
-    if (extracted > 0) {
-      render();
-    }
+    pixels->show();
     next_hr = (now_hr+1)%24;
     Serial.println("Updated");
 }
