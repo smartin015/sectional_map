@@ -37,6 +37,7 @@ void read_config_line(Config& cfg, const char* line) {
   buf[CFG_READ_BUFSZ]=0; // ensure null termination
 
 	replacechar(buf, '\n', '\0');
+	replacechar(buf, '\r', '\0');
   char* p1 = strtok(buf, "=");
   char* p2 = strtok(0, "=");
   if (p1 == NULL || p2 == NULL) {
