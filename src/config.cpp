@@ -1,6 +1,7 @@
 #include "config.h"
 #include <stdlib.h>     /* atoi */
 #include <cstring>
+#include <cstdio>
 
 Config::Config() {
   memset(this->ssid, 0, MAX_WIFI_FIELD_SZ+1);
@@ -24,20 +25,36 @@ int replacechar(char *str, char orig, char rep) {
     return n;
 }
 
+#define CFG_READ_BUFSZ 64
+
 void read_config_line(Config& cfg, const char* line) {
   if (cfg.num >= MAX_LOCATIONS) {
     return;
   }
   // split line, check / parse 
-  char buf[64];
-  strncpy(buf, line, 64);
+  char buf[CFG_READ_BUFSZ+1];
+  strncpy(buf, line, CFG_READ_BUFSZ);
+  buf[CFG_READ_BUFSZ]=0; // ensure null termination
+
 	replacechar(buf, '\n', '\0');
   char* p1 = strtok(buf, "=");
   char* p2 = strtok(0, "=");
+  if (p1 == NULL || p2 == NULL) {
+    printf("Skipping unparseable line: \"%s\"\n", buf);
+    return;
+  }
   if (strcmp(p1, "SSID") == 0) {
-    strncpy(cfg.ssid, p2, MAX_WIFI_FIELD_SZ);
+    if (strlen(p2) > MAX_WIFI_FIELD_SZ) {
+      printf("ERROR: Cannot set SSID; max length exceeded\n");
+    } else {
+      strncpy(cfg.ssid, p2, MAX_WIFI_FIELD_SZ);
+    }
   } else if (strcmp(p1, "PASS") == 0) {
-    strncpy(cfg.pass, p2, MAX_WIFI_FIELD_SZ);
+    if (strlen(p2) > MAX_WIFI_FIELD_SZ) {
+      printf("ERROR: Cannot set PASS; max length exceeded\n");
+    } else {
+      strncpy(cfg.pass, p2, MAX_WIFI_FIELD_SZ);
+    }
   } else {
     //printf("p2: %s\n", p2);
     if (strstr(p2, "!")) {
@@ -48,9 +65,15 @@ void read_config_line(Config& cfg, const char* line) {
         cfg.locations[cfg.num].ovr = strtol(p3, NULL, 16);
       }
     }
-    strncpy(cfg.locations[cfg.num].name, p1, LOCNAME_SZ);
-    cfg.locations[cfg.num].idx = atoi(p2);
-    cfg.num++;
+    if (strlen(p1) > LOCNAME_SZ) {
+      printf("ERROR: Skipping location %s; location name too long\n", p1);
+    } else if (strspn(p2, "0123456789") != strlen(p2)) {
+      printf("ERROR: Skipping location %s; LED index is not digit\n", p1);
+    } else {
+      strncpy(cfg.locations[cfg.num].name, p1, LOCNAME_SZ);
+      cfg.locations[cfg.num].idx = atoi(p2);
+      cfg.num++;
+    }
   }
 }
 
