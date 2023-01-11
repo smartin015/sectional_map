@@ -14,45 +14,95 @@ const char* CATEGORY_STR[] = {
 
 const char* category_str(Category c) {
   if (c > NUM_CATEGORIES || c < 0) {
-    c = INVALID;
+    c = CATEGORY_INVALID;
   }
   return CATEGORY_STR[c];
 }
 
+int DIR_COMPASS[] = {10000, 0, 45, 90, 135, 180, 225, 270, 315, 0};
+int dir_to_angle(Direction dir) {
+  return DIR_COMPASS[dir];
+}
+
+Direction to_wind_dir(int deg) {
+  Direction result = DIR_INVALID;
+  int best = dir_to_angle(result);
+  for (int i = DIR_N; i < NUM_DIR; i++) {
+    Direction d = Direction(i);
+    int delta = abs(deg - dir_to_angle(d));
+    // printf("%d - %d = %d vs %d\n", deg, dir_to_angle(d), delta, best);
+    if (delta < best) {
+      // printf("new best dir %d\n", d);
+      result = d;
+      best = delta;
+    }
+  }
+  return result;
+}
+
+#define METAR_SEPS " <"
+
 void parse_metar(const char* metar, uint16_t len, METAR &result) {
-  char m[len];
+  char m[len+1];
   strncpy(m, metar, len);
+  m[len] = 0;
+
 
   result.vis = VIS_MAX;
   result.ceiling = CEIL_MAX;
+  result.wind_dir = DIR_INVALID;
+  result.lightning = LIGHTNING_NONE;
+  result.wind_speed = 0;
+  result.gusts = 0;
   strncpy(result.name, m, NAME_SZ);
   result.name[NAME_SZ] = '\0';
 
   char* saveptr;
-  char* ptr = strtok_r(m, " ", &saveptr);
+  char* ptr = strtok_r(m, METAR_SEPS, &saveptr);
+  // Skip over the first part of the string - airport code may have trigger characters in it
+  ptr = strtok_r(NULL, METAR_SEPS, &saveptr);
   while (ptr != NULL) {
-    char* eptr = strchr(ptr, ' ');
-    if (eptr == NULL) {
-      eptr = strchr(ptr, 0);
-    }
-    // Visibility ends in "SM" (statute miles)
     if (strstr(ptr, "SM")) {
+      // Visibility ends in "SM" (statute miles), e.g. 10SM
       if (strstr(ptr, "/")) {
         // Fractional visibility is rounded down to 0
         result.vis = 0;
       } else {
         result.vis = atoi(ptr);
       }
-    }
-    
-    // Now check cloud ceiling
-    if (strstr(ptr, "BKN") || strstr(ptr, "OVC")) {
+    } else if (strstr(ptr, "BKN") || strstr(ptr, "OVC")) {
+      // Cloud ceiling, e.g. OVC150, BKN220
       int c = atoi(ptr+3)*100;
       if (c < result.ceiling) {
         result.ceiling = c;
       }
+    } else if (strstr(ptr, "KT")) {
+      // Wind direction and speed
+      // e.g. 15011G17KT, 25004KT, VRB12KT
+      char buf[] = {ptr[0], ptr[1], ptr[2], 0};
+      if (strcmp(buf, "VRB")==0) {
+        result.wind_dir = DIR_VARIABLE;
+      } else {
+        int deg = atoi(buf);
+        result.wind_dir = to_wind_dir(deg);
+      }
+      result.wind_speed = atoi(ptr+3);
+      char* gust_ptr = strstr(ptr, "G");
+      if (gust_ptr) {
+        result.gusts = atoi(gust_ptr+1);
+      }
+    } else if (strstr(ptr, "TS") || strstr(ptr, "DSNT")) {
+      // Lightning / thunderstorm info, e.g.
+      // `LTG DSNT N-E`, `TS`, `VCTS`
+      if (strstr(ptr, "DSNT")) {
+        result.lightning = LIGHTNING_DISTANT;
+      } else if (strstr(ptr, "VCTS")) {
+        result.lightning = LIGHTNING_VICINITY;
+      } else if (strstr(ptr, "TS")) {
+        result.lightning = LIGHTNING_HERE;
+      }
     }
-    ptr = strtok_r(NULL, " ", &saveptr);
+    ptr = strtok_r(NULL, METAR_SEPS, &saveptr);
   }
 }
 
@@ -60,7 +110,7 @@ Category metar_category(const METAR &m) {
   Category c, v;
 
   if (m.name[0] == 0) {
-    return INVALID;
+    return CATEGORY_INVALID;
   }
 
   if (m.ceiling < 500) {
