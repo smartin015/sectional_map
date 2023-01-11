@@ -20,10 +20,10 @@ void setup() {
   Serial.println(cfg.num);
 
   Serial.println("Setting up LEDs\n");
-  pixels = new Adafruit_NeoPixel(cfg.num, LED_PIN, NEO_GRBW + NEO_KHZ800);
+  pixels = new Adafruit_NeoPixel(cfg.num, LED_PIN, NEO_RGB + NEO_KHZ800);
   pixels->begin();
   for (int i = 0; i < cfg.num; i++) {
-    pixels->setPixelColor(i, pixels->Color(1, 0, 0, 0));
+    pixels->setPixelColor(i, pixels->Color(1, 0, 0));
   }
   pixels->show();
   Serial.print("Connecting to SSID: ");
@@ -138,19 +138,19 @@ int get_location(const char* name) {
 
 void render() {
   for (int i = 0; i < cfg.num; i++) {
-    uint32_t c = pixels->Color(1, 0, 0, 0);
+    uint32_t c = pixels->Color(1, 0, 0);
     switch (metar_category(results[i])) {
       case VFR:
-        c = pixels->Color(0, 64, 128, 0);
+        c = pixels->Color(0, 64, 128);
         break;
       case MVFR:
-        c = pixels->Color(60, 0, 100, 0);
+        c = pixels->Color(60, 0, 100);
         break;
       case IFR:
-        c = pixels->Color(100, 0, 60, 0);
+        c = pixels->Color(100, 0, 60);
         break;
       case LIFR:
-        c = pixels->Color(128, 0, 20, 0);
+        c = pixels->Color(128, 0, 20);
         break;
       default:
         break;
