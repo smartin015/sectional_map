@@ -160,14 +160,17 @@ uint8_t next_hr = -1;
 uint8_t next_minute = 5;
 void do_update(int now_hr) {
     Serial.println("Updating...");
+    int extracted = 0;
     for (int i = 0; i < cfg.num; i += BATCH_SZ) {
       int count = min(BATCH_SZ, cfg.num-i);
-      get_metars(i, count);
+      extracted = get_metars(i, count);
       for (int j = i; j < i+count; j++) {
         printMETAR(results[j]);
       }
     }
-    render();
+    if (extracted > 0) {
+      render();
+    }
     next_hr = (now_hr+1)%24;
     Serial.println("Updated");
 }
