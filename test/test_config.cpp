@@ -88,7 +88,7 @@ void test_cfg_override_color() {
   char path[] = "/tmp/fileXXXXXX";
   int fd = mkstemp(path);
   FILE* fp = fdopen(fd, "w");
-  fputs("ABCD=0!FF8800\nDEFG=100!FFAAAA",fp);
+  fputs("ABCD=0#FF8800\nDEFG=100#FFAAAA",fp);
   fclose(fp);
 
   Config c;

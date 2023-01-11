@@ -57,9 +57,9 @@ void read_config_line(Config& cfg, const char* line) {
     }
   } else {
     //printf("p2: %s\n", p2);
-    if (strstr(p2, "!")) {
-      char* p3 = strtok(p2, "!");  
-      p3 = strtok(0, "!");
+    if (strstr(p2, "#")) {
+      char* p3 = strtok(p2, "#");
+      p3 = strtok(0, "#");
       //printf("Found ovr: %s\n", p3);
       if (p3 != NULL) {
         cfg.locations[cfg.num].ovr = strtol(p3, NULL, 16);
