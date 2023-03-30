@@ -49,7 +49,6 @@ enum Category {
   VFR, 
   NUM_CATEGORIES
 };
-
 const char* category_str(Category c);
 
 void parse_metar(const char* metar, uint16_t len, METAR &result);
