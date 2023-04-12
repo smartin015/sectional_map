@@ -94,11 +94,11 @@ void setup() {
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("Awaiting NTP server");
   // TODO disable if not using hourly timing
-  await_sync();
-  Serial.print("Time synced");
-  do_update();
+  //Serial.println("Awaiting NTP server");
+  //await_sync();
+  //Serial.print("Time synced");
+  //do_update();
 }
 
 void write_loc_csv(int start_idx, int count) {
@@ -118,8 +118,8 @@ void write_loc_csv(int start_idx, int count) {
   }
 }
 
-#define BUFSZ 8600 
-#define BATCH_SZ 20
+#define BUFSZ 6000 
+#define BATCH_SZ 3
 char buf[BUFSZ];
 METAR results[BATCH_SZ];
 int get_metars(int start_idx, int count) {
@@ -151,7 +151,7 @@ int get_metars(int start_idx, int count) {
     if (len > BUFSZ) {
       Serial.print("ERROR ERROR ERROR: Buffer length exceeded - size of response is ");
       Serial.println(len);
-    } else {
+    } else if (len > 0) {
       Serial.print("Received ");
       Serial.print(len);
       Serial.println(" bytes; extracting...");
@@ -160,6 +160,8 @@ int get_metars(int start_idx, int count) {
       Serial.print("Extracted ");
       Serial.print(num_extracted);
       Serial.println(" locations");
+    } else {
+      Serial.println("0 bytes received; skipping batch");
     }
   } else {
     Serial.print("Error code: ");
