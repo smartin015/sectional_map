@@ -6,8 +6,7 @@
 #define NAME_SZ 4
 #define CEIL_MAX 10000
 #define VIS_MAX 5
-#define METAR_BEGIN "<code>"
-#define METAR_END "</code>"
+#define METAR_SEP "\n"
 
 enum Lightning {
   LIGHTNING_NONE,

@@ -141,7 +141,7 @@ int get_metars(int start_idx, int count) {
 
   HTTPClient http;
   write_loc_csv(start_idx, count);
-  String addr = "https://www.aviationweather.gov/metar/data?ids="+loc_csv+"&format=raw&hours=0&taf=off&layout=off&date=0";
+  String addr = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=" + loc_csv;
   Serial.print("Connecting to ");
   Serial.println(addr);
   http.begin(client, addr);

@@ -138,21 +138,18 @@ Category metar_category(const METAR &m) {
 
 uint16_t extract_metar(char* html, uint16_t len, METAR* result, uint16_t rlen) {
   METAR* mptr = result;
-  char* ptr = strstr(html, METAR_BEGIN);
-  while (ptr != NULL) {
-    // printf("ptr = %s\n", ptr);
-    char *start = ptr + strlen(METAR_BEGIN); 
-    char *end = strstr(ptr, METAR_END); 
-    if (start == NULL || end == NULL) {
-      // printf("start or end is null: %x %x", start, end);
-      return 0; // Shouldn't happen, but oh well
+  char* ptr = html;
+  while (ptr != NULL && ptr < html+len) {
+    char *end = strstr(ptr, METAR_SEP); 
+    if (end == NULL) {
+      end = html+len-1;
     }
-    parse_metar(start, end-start, *mptr);
+    parse_metar(ptr, end-ptr+1, *mptr);
     if ((++mptr - result) >= rlen) {
       // printf("mptr - result = %d\n", mptr - result);
       return rlen;
     }
-    ptr = strstr(end, METAR_BEGIN);
+    ptr = end + 1;
   }
   return (mptr - result);
 }

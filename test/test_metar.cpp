@@ -89,7 +89,7 @@ void test_extract_metar_empty() {
 
 void test_extract_metar_basic() {
   METAR m[1];
-  char* s = (char*)"asdfasdfasdf\n   <code>KSEA 10SM VCTS OVC046 09010KT</code>";
+  char* s = (char*)"KSEA 10SM VCTS OVC046 09010KT";
   TEST_ASSERT_EQUAL(1, extract_metar(s, strlen(s), m, 1));
   TEST_ASSERT_EQUAL_STRING("KSEA", m[0].name);
   TEST_ASSERT_EQUAL(10, m[0].vis);
@@ -102,7 +102,7 @@ void test_extract_metar_basic() {
 
 void test_extract_metar_variable_winds_gusts() {
   METAR m[1];
-  char* s = (char*)"asdfasdfasdf\n   <code>KSEA TS VRB123G45KT</code>";
+  char* s = (char*)"KSEA TS VRB123G45KT";
   TEST_ASSERT_EQUAL(1, extract_metar(s, strlen(s), m, 1));
   TEST_ASSERT_EQUAL(DIR_VARIABLE, m[0].wind_dir);
   TEST_ASSERT_EQUAL(123, m[0].wind_speed);
@@ -112,7 +112,7 @@ void test_extract_metar_variable_winds_gusts() {
 
 void test_extract_metar_multi() {
   METAR m[2];
-  char* s = (char*)"asdfasdfasdf\n   <code>KSEA 10SM OVC046</code>\n   <code>TEST 5SM LTG DSNT BKN030</code>\n\n";
+  char* s = (char*)"KSEA 10SM OVC046\nTEST 5SM LTG DSNT BKN030\n\n";
   TEST_ASSERT_EQUAL(2, extract_metar(s, strlen(s), m, 2));
   TEST_ASSERT_EQUAL_STRING("KSEA", m[0].name);
   TEST_ASSERT_EQUAL(10, m[0].vis);
