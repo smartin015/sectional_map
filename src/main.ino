@@ -11,6 +11,11 @@ Adafruit_NeoPixel *pixels;
 #define MODE_SWITCH_PIN D6
 #define ANALOG_BRIGHT_PIN A0
 
+void panic_loop(const char* text) {
+  Serial.println(text);
+  while (1) {}
+}
+
 float brightness = 1.0;
 int nled = 0;
 uint32_t *pxbuf[NUM_DISPLAY_MODES];
@@ -42,15 +47,37 @@ IRAM_ATTR void mode_switch_isr() {
   mode_sw = digitalRead(MODE_SWITCH_PIN);
 }
 
+int status_px = 0;
+void incr_status_px() {
+  for (int i = 0; i < status_px; i++) {
+    pixels->setPixelColor(i, pixels->Color(0, 150, 0));
+  } 
+  pixels->show();
+  status_px++;
+}
+
 void setup() {
+  pixels = new Adafruit_NeoPixel(20, LED_PIN, NEO_GRBW + NEO_KHZ800);
+  pixels->begin();
+  pixels->clear();
+  incr_status_px();
+
   pinMode(MODE_SWITCH_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(MODE_SWITCH_PIN), mode_switch_isr, CHANGE);
 
   Serial.begin(115200);
   Serial.println("Reading config\n");
-  read_config(cfg, "/config.txt");
+  int status = read_config(cfg, "/config.txt");
+  if (status != ERR_NONE) {
+      for (int i = 0; i < status; i++) {
+        pixels->setPixelColor(10+i, pixels->Color(255, 0, 0));
+      }
+      pixels->show();
+      panic_loop("Config error");
+  } 
   Serial.print("Done reading config. Num locations: ");
   Serial.println(cfg.num);
+  incr_status_px();
   
   Serial.println("=== color overrides ===");
   for (int i = 0; i < cfg.num; i++) {
@@ -69,27 +96,27 @@ void setup() {
   for (int i = 0; i < cfg.num; i++) {
     nled = max(nled, cfg.locations[i].idx+1);
   }
-
-  // TODO set to RGB
+  free(pixels);
   pixels = new Adafruit_NeoPixel(nled, LED_PIN, NEO_GRBW + NEO_KHZ800);
-  pxbuf[WEATHER_MODE] = (uint32_t*) malloc(nled * sizeof(uint32_t));
-  pxbuf[WIND_MODE] = (uint32_t*) malloc(nled * sizeof(uint32_t));
-  for (int i = 0; i < nled; i++) {
-    pxbuf[WEATHER_MODE][i] = 0x880000;
-    pxbuf[WIND_MODE][i] = 0x880000;
-  }
-  pixels->begin();
-  flush_pixels();
+  incr_status_px();
+
   Serial.print("Connecting to SSID: ");
   Serial.print(cfg.ssid);
   Serial.print(", password: ");
   Serial.println(cfg.pass);
-
   WiFi.begin(cfg.ssid, cfg.pass);
+  incr_status_px();
+  int wifi_wait = 0;
   while(WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    delay(500);
     Serial.print(".");
+    if (wifi_wait++ == 40) {
+      printf("Taking a long time to connect, throwing a color");
+      pixels->setPixelColor(10, pixels->Color(255, 0, 0));
+      pixels->show();
+    }
   }
+  incr_status_px();
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
   Serial.println(WiFi.localIP());
@@ -99,6 +126,13 @@ void setup() {
   //await_sync();
   //Serial.print("Time synced");
   //do_update();
+  pxbuf[WEATHER_MODE] = (uint32_t*) malloc(nled * sizeof(uint32_t));
+  pxbuf[WIND_MODE] = (uint32_t*) malloc(nled * sizeof(uint32_t));
+  for (int i = 0; i < nled; i++) {
+    pxbuf[WEATHER_MODE][i] = 0x440000;
+    pxbuf[WIND_MODE][i] = 0x440000;
+  }
+  flush_pixels();
 }
 
 void write_loc_csv(int start_idx, int count) {
