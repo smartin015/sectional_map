@@ -57,7 +57,7 @@ void incr_status_px() {
 }
 
 void setup() {
-  pixels = new Adafruit_NeoPixel(20, LED_PIN, NEO_GRBW + NEO_KHZ800);
+  pixels = new Adafruit_NeoPixel(20, LED_PIN, NEO_GRB + NEO_KHZ800);
   pixels->begin();
   pixels->clear();
   incr_status_px();
@@ -97,7 +97,7 @@ void setup() {
     nled = max(nled, cfg.locations[i].idx+1);
   }
   free(pixels);
-  pixels = new Adafruit_NeoPixel(nled, LED_PIN, NEO_GRBW + NEO_KHZ800);
+  pixels = new Adafruit_NeoPixel(nled, LED_PIN, NEO_GRB + NEO_KHZ800);
   incr_status_px();
 
   Serial.print("Connecting to SSID: ");
@@ -246,7 +246,7 @@ void render(int extracted, DisplayMode mode) {
       case WEATHER_MODE:
         switch (metar_category(results[i])) {
           case VFR:
-            c = pixels->Color(0, 64, 128);
+            c = pixels->Color(0, 200, 0);
             break;
           case MVFR:
             c = pixels->Color(60, 0, 100);
@@ -354,7 +354,7 @@ void handle_brightness() {
 
 void loop() {
   handle_mode();
-  handle_brightness();
+  // handle_brightness();
 
   //if (should_update_hourly()) {
   if (should_update_periodic(5*60*1000)) {
